@@ -1,0 +1,4 @@
+.DS_Store
+http/secure
+app/config/secure.ini
+logs/
