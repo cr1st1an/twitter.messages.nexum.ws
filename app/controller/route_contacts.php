@@ -48,11 +48,13 @@ class Route_Contacts {
         }
 
         if (empty($response)) {
-            if (0 != $get['page'])
-                $pagination_data['prev'] = $get['page'] - 1;
-            if ((20 * ($get['page'] + 1)) <= 1000)
-                $pagination_data['next'] = $get['page'] + 1;
-
+            if (20 <= count($profiles_data)) {
+                if (0 != $get['page'])
+                    $pagination_data['prev'] = $get['page'] - 1;
+                if ((20 * ($get['page'] + 1)) < 1000)
+                    $pagination_data['next'] = $get['page'] + 1;
+            }
+            
             $response['success'] = true;
             $response['message'] = "Here are the results for the twitter search '" . $get['query'] . "' ";
             $response['pagination'] = $pagination_data;
@@ -122,7 +124,7 @@ class Route_Contacts {
         if (empty($response)) {
             if (0 != $get['page'])
                 $pagination_data['prev'] = $get['page'] - 1;
-            if ((APP_PAGE_ITEMS * ($get['page'] + 1)) <= count($friends_ids))
+            if ((APP_PAGE_ITEMS * ($get['page'] + 1)) < count($friends_ids))
                 $pagination_data['next'] = $get['page'] + 1;
 
             $response['success'] = true;
@@ -194,7 +196,7 @@ class Route_Contacts {
         if (empty($response)) {
             if (0 != $get['page'])
                 $pagination_data['prev'] = $get['page'] - 1;
-            if ((APP_PAGE_ITEMS * ($get['page'] + 1)) <= count($followers_ids))
+            if ((APP_PAGE_ITEMS * ($get['page'] + 1)) < count($followers_ids))
                 $pagination_data['next'] = $get['page'] + 1;
 
             $response['success'] = true;

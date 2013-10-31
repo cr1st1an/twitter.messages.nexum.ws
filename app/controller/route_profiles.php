@@ -2,7 +2,7 @@
 
 class Route_Profiles {
     
-    public static function getTwitterProfile() {
+    public static function getTwitter() {
         include_once Epi::getPath('data') . 'mc_lib_twitter.php';
         include_once Epi::getPath('lib') . 'Data.php';
         include_once Epi::getPath('lib') . 'Session.php';
@@ -33,7 +33,6 @@ class Route_Profiles {
         }
 
         if (empty($response)) {
-            
             $r_getUserShow = $MC_Lib_Twitter->getUserShow($get['identifier'], $session['account']['credentials']);
             if (!$r_getUserShow['success']) {
                 $response = $r_getUserShow;

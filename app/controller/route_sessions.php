@@ -3,14 +3,14 @@
 class Route_Sessions {
 
     public static function postRoot() {
-        include_once Epi::getPath('data') . 'mc_sessions.php';
         include_once Epi::getPath('data') . 'mc_accounts.php';
+        include_once Epi::getPath('data') . 'mc_sessions.php';
         include_once Epi::getPath('lib') . 'Data.php';
         include_once Epi::getPath('lib') . 'Session.php';
         include_once Epi::getPath('lib') . 'Twitter.php';
 
-        $MC_Sessions = new MC_Sessions();
         $MC_Accounts = new MC_Accounts();
+        $MC_Sessions = new MC_Sessions();
         $Data = new Data();
         $Session = new Session();
         $Twitter = new Twitter();
@@ -23,7 +23,9 @@ class Route_Sessions {
         if (empty($response)) {
             $r_getPostParams = $Data->getPostParams(array('id_session', 'uiid'), array());
 
-            if ($r_getPostParams['success']) {
+            if (!$r_getPostParams['success']) {
+                $response = $r_getPostParams;
+            } else {
                 $post = $r_getPostParams['post'];
             }
         }
