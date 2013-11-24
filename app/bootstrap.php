@@ -18,7 +18,7 @@ Epi::init('api', 'cache', 'config', 'database', 'route', 'session', 'debug');
 
 getConfig()->load('default.ini', 'secure.ini');
 
-if (strpos($_SERVER['SERVER_NAME'], 'dev.messages.nexum.ws') !== false) {
+if (strpos($_SERVER['SERVER_NAME'], 'dev.') !== false) {
     getConfig()->set('db', getConfig()->get('db-dev'));
     getConfig()->set('memcached', getConfig()->get('memcached-dev'));
 }
@@ -39,11 +39,15 @@ EpiSession::employ(
         )
 );
 
+define('APP_PAGE_ITEMS', getConfig()->get('app')->page_items);
+
 define('TWITTER_CONSUMER_KEY', getConfig()->get('twitter')->consumer_key);
 define('TWITTER_CONSUMER_SECRET', getConfig()->get('twitter')->consumer_secret);
 define('TWITTER_CALLBACK_URL', getConfig()->get('twitter')->callback_url);
 
-define('APP_PAGE_ITEMS', getConfig()->get('app')->page_items);
+define('PARSE_APP_ID', getConfig()->get('parse')->app_id);
+define('PARSE_MASTER_KEY', getConfig()->get('parse')->master_key);
+define('PARSE_REST_KEY', getConfig()->get('parse')->rest_key);
 
 include_once 'controller/router.php';
 

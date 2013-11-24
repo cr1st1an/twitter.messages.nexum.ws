@@ -2,12 +2,14 @@
 
 class Route_Threads {
 
-    public static function getTwitter() {
+    public static function getRoot() {
+        include_once Epi::getPath('data') . 'mc_messages.php';
         include_once Epi::getPath('data') . 'mc_threads.php';
         include_once Epi::getPath('data') . 'mc_lib_twitter.php';
         include_once Epi::getPath('lib') . 'Data.php';
         include_once Epi::getPath('lib') . 'Session.php';
 
+        $MC_Messages = new MC_Messages();
         $MC_Threads = new MC_Threads();
         $MC_Lib_Twitter = new MC_Lib_Twitter();
         $Data = new Data();
@@ -15,7 +17,7 @@ class Route_Threads {
 
         $response = array();
         $session = $Session->get();
-        $twitter_threads_data = array();
+        $messages_threads_data = array();
         $threads_data = array();
 
         if (empty($response) && empty($session['account'])) {
@@ -25,26 +27,38 @@ class Route_Threads {
         }
 
         if (empty($response)) {
-            $r_getDirectMessages = $MC_Lib_Twitter->getDirectMessages($session['account']['identifier'], $session['account']['credentials'], false);
-            if (!$r_getDirectMessages['success']) {
-                $response = $r_getDirectMessages;
+            $r_selectAll_1 = $MC_Messages->selectAll($session['account']['id_account']);
+            if (!$r_selectAll_1['success']) {
+                $response = $r_selectAll_1;
             } else {
-                $twitter_threads_data = $Data->threadsFromTwitterDDMM($r_getDirectMessages['twitter_ddmm_data'], $session['account']['identifier']);
+                $messages_threads_data = $Data->threadsFromMessages($r_selectAll_1['messages_data'], $session['account']);
             }
         }
 
         if (empty($response)) {
-            $r_selectAll = $MC_Threads->selectAll($session['account']['id_account']);
-            if (!$r_selectAll['success']) {
-                $response = $r_selectAll;
+            $r_selectAll_2 = $MC_Threads->selectAll($session['account']['id_account']);
+            if (!$r_selectAll_2['success']) {
+                $response = $r_selectAll_2;
             } else {
-                $threads_data = $Data->threadsTwitterExtend($twitter_threads_data, $r_selectAll['threads_data']);
+                $threads_data = $Data->threadsMerge($messages_threads_data, $r_selectAll_2['threads_data'], $session['account']);
+            }
+        }
+
+        if (empty($response)) {
+            foreach ($threads_data as $id => $thread_data) {
+                $r_getUserShow = $MC_Lib_Twitter->getUserShow($thread_data['identifier'], $session['account']['credentials']);
+                if ($r_getUserShow['success']) {
+                    $profile_data = $Data->profileFromTwitterUser($r_getUserShow['twitter_profile_data']);
+                    $threads_data[$id]['picture'] = $profile_data['picture'];
+                    $threads_data[$id]['title'] = $profile_data['fullname'];
+                    $threads_data[$id]['subtitle'] = '@' . $profile_data['username'];
+                }
             }
         }
 
         if (empty($response)) {
             $response['success'] = true;
-            $response['message'] = json_encode($r_selectAll['threads_data']); //"Here are your threads";
+            $response['message'] = "Here are your threads";
             $response['threads_data'] = $threads_data;
         }
 

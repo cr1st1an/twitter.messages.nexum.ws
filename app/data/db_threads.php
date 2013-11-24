@@ -53,30 +53,21 @@ class DB_Threads {
             $response['err'] = 0;
         }
 
-        $network = (string) $DATA['network'];
-        if (empty($response) && empty($network)) {
-            $response['success'] = false;
-            $response['message'] = "Required value NETWORK is missing in DB_Threads->insert()";
-            $response['err'] = 0;
-        }
-
         if (empty($response)) {
             $select_data = array(
                 'id_account' => $id_account,
-                'identifier' => $identifier,
-                'network' => $network
+                'identifier' => $identifier
             );
-            $thread_data = getDatabase()->one('SELECT * FROM ' . $this->_name . ' WHERE id_account=:id_account AND identifier=:identifier AND network=:network', $select_data);
+            $thread_data = getDatabase()->one('SELECT * FROM ' . $this->_name . ' WHERE id_account=:id_account AND identifier=:identifier', $select_data);
 
             if (empty($thread_data)) {
                 $insert_data = array(
                     'id_account' => $id_account,
                     'identifier' => $identifier,
-                    'network' => $network,
                     'opened' => $DATA['opened']
                 );
                 $id_thread = getDatabase()->execute(
-                        'INSERT INTO ' . $this->_name . '(id_account, identifier, network, opened) VALUES(:id_account, :identifier, :network, :opened)', $insert_data
+                        'INSERT INTO ' . $this->_name . '(id_account, identifier, opened) VALUES(:id_account, :identifier, :opened)', $insert_data
                 );
                 $message = "A new thread with id '$id_thread' has been inserted [DB]";
             } else {

@@ -2,7 +2,7 @@
 
 class Route_Profiles {
     
-    public static function getTwitter() {
+    public static function getRoot() {
         include_once Epi::getPath('data') . 'mc_lib_twitter.php';
         include_once Epi::getPath('lib') . 'Data.php';
         include_once Epi::getPath('lib') . 'Session.php';

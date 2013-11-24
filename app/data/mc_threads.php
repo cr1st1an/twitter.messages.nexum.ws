@@ -63,7 +63,7 @@ class MC_Threads {
             if (!$r_insert['success']) {
                 $response = $r_insert;
             } else {
-                $id_thread = $r_insert['id_session'];
+                $id_thread = $r_insert['id_thread'];
             }
         }
 

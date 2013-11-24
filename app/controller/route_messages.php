@@ -2,12 +2,14 @@
 
 class Route_Messages {
 
-    public static function getTwitter() {
+    public static function getRoot() {
+        include_once Epi::getPath('data') . 'mc_messages.php';
         include_once Epi::getPath('data') . 'mc_threads.php';
         include_once Epi::getPath('data') . 'mc_lib_twitter.php';
         include_once Epi::getPath('lib') . 'Data.php';
         include_once Epi::getPath('lib') . 'Session.php';
 
+        $MC_Messages = new MC_Messages();
         $MC_Threads = new MC_Threads();
         $MC_Lib_Twitter = new MC_Lib_Twitter();
         $Data = new Data();
@@ -44,11 +46,11 @@ class Route_Messages {
         }
 
         if (empty($response)) {
-            $r_getDirectMessages = $MC_Lib_Twitter->getDirectMessages($session['account']['identifier'], $session['account']['credentials'], false);
-            if (!$r_getDirectMessages['success']) {
-                $response = $r_getDirectMessages;
+            $r_selectAll = $MC_Messages->selectAll($session['account']['id_account']);
+            if (!$r_selectAll['success']) {
+                $response = $r_selectAll;
             } else {
-                $messages_data = $Data->messagesFromTwitterDDMM($r_getDirectMessages['twitter_ddmm_data'], $session['account']['identifier'], $get['identifier']);
+                $messages_data = $Data->threadMessagesFromMessages($r_selectAll['messages_data'], $session['account'], $get['identifier']);
             }
         }
 
@@ -56,7 +58,6 @@ class Route_Messages {
             $update_thread_data = array(
                 'id_account' => $session['account']['id_account'],
                 'identifier' => $get['identifier'],
-                'network' => 'twitter',
                 'opened' => true
             );
             $r_insert = $MC_Threads->insert($update_thread_data);
@@ -68,7 +69,7 @@ class Route_Messages {
         if (empty($response)) {
             $response['success'] = true;
             $response['message'] = "Here are your threads";
-            $response['account_data'] = $Data->publicAccount($session['account'], $session['account']);
+            //$response['account_data'] = $Data->publicAccount($session['account'], $session['account']);
             $response['profile_data'] = $profile_data;
             $response['messages_data'] = $messages_data;
         }
@@ -76,7 +77,7 @@ class Route_Messages {
         return $response;
     }
 
-    public static function postTwitter() {
+    public static function postRoot() {
         include_once Epi::getPath('lib') . 'Data.php';
         include_once Epi::getPath('lib') . 'Session.php';
         include_once Epi::getPath('lib') . 'Twitter.php';

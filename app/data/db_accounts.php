@@ -53,13 +53,6 @@ class DB_Accounts {
             $response['err'] = 0;
         }
 
-        $network = (string) $DATA['network'];
-        if (empty($response) && empty($network)) {
-            $response['success'] = false;
-            $response['message'] = "Required value NETWORK is missing in DB_Accounts->insert()";
-            $response['err'] = 0;
-        }
-
         $credentials = $DATA['credentials'];
         if (empty($response) && (empty($credentials) || !is_array($credentials))) {
             $response['success'] = false;
@@ -72,16 +65,14 @@ class DB_Accounts {
 
         if (empty($response)) {
             $select_data = array(
-                'identifier' => $identifier,
-                'network' => $network
+                'identifier' => $identifier
             );
-            $account_data = getDatabase()->one('SELECT * FROM ' . $this->_name . ' WHERE identifier=:identifier AND network=:network', $select_data);
+            $account_data = getDatabase()->one('SELECT * FROM ' . $this->_name . ' WHERE identifier=:identifier', $select_data);
 
             if (empty($account_data)) {
                 $insert_data = array(
                     'created' => $created,
                     'identifier' => $identifier,
-                    'network' => $network,
                     'fullname' => $DATA['fullname'],
                     'username' => $DATA['username'],
                     'picture' => $DATA['picture'],
@@ -89,7 +80,7 @@ class DB_Accounts {
                     'status' => true
                 );
                 $id_account = getDatabase()->execute(
-                        'INSERT INTO ' . $this->_name . '(created, identifier, network, fullname, username, picture, credentials, status) VALUES(:created, :identifier, :network, :fullname, :username, :picture, :credentials, :status)', $insert_data
+                        'INSERT INTO ' . $this->_name . '(created, identifier, fullname, username, picture, credentials, status) VALUES(:created, :identifier, :fullname, :username, :picture, :credentials, :status)', $insert_data
                 );
                 $message = "A new account with id '$id_account' has been inserted [DB]";
             } else {

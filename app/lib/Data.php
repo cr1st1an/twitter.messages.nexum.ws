@@ -97,12 +97,11 @@ class Data {
         return $response;
     }
 
-    public function publicAccount($ACCOUNT_DATA, $ACTIVE_ACCOUNT = array()) {
-        $account_data = array();
+    public function publicAccount($ACCOUNT_DATA, $PROFILE_DATA = array()) {
+        $account_data = $PROFILE_DATA;
 
         $account_data['id_account'] = $ACCOUNT_DATA['id_account'];
         $account_data['identifier'] = $ACCOUNT_DATA['identifier'];
-        $account_data['network'] = $ACCOUNT_DATA['network'];
         $account_data['fullname'] = $ACCOUNT_DATA['fullname'];
         $account_data['username'] = $ACCOUNT_DATA['username'];
         $account_data['picture'] = $ACCOUNT_DATA['picture'];
@@ -111,106 +110,91 @@ class Data {
         return $account_data;
     }
 
-    public function profileFromTwitterUser($TWITTER_USER_OBJECT) {
+    public function profileFromTwitterUser($TWITTER_USER_OBJECT, $FOLLOWERS_IDS = array(), $FRIENDS_IDS = array()) {
         $profile_data = array();
 
-        $profile_data['identifier'] = $TWITTER_USER_OBJECT['id'];
-        $profile_data['network'] = 'twitter';
+        $profile_data['identifier'] = $TWITTER_USER_OBJECT['id_str'];
         $profile_data['fullname'] = isset($TWITTER_USER_OBJECT['name']) ? $TWITTER_USER_OBJECT['name'] : '';
         $profile_data['username'] = $TWITTER_USER_OBJECT['screen_name'];
         $profile_data['picture'] = str_ireplace('_normal', '_bigger', $TWITTER_USER_OBJECT['profile_image_url_https']);
-        $profile_data['status'] = isset($TWITTER_USER_OBJECT['status']['text']) ? $TWITTER_USER_OBJECT['status']['text'] : '';
         $profile_data['description'] = isset($TWITTER_USER_OBJECT['description']) ? $TWITTER_USER_OBJECT['description'] : '';
         $profile_data['back'] = isset($TWITTER_USER_OBJECT['profile_banner_url']) ? $TWITTER_USER_OBJECT['profile_banner_url'] . '/mobile_retina' : '';
         $profile_data['count_following'] = $TWITTER_USER_OBJECT['friends_count'];
         $profile_data['count_followers'] = $TWITTER_USER_OBJECT['followers_count'];
-
+        $profile_data['follower'] = (in_array($profile_data['identifier'], $FOLLOWERS_IDS) ? true : false);
+        $profile_data['following'] = (in_array($profile_data['identifier'], $FRIENDS_IDS) ? true : false);
+        
         return $profile_data;
     }
 
-    public function threadsFromTwitterDDMM($TWITTER_DDMM_OBJECT, $ACCOUNT_PROFILE_ID) {
-        $twitter_threads_data = array();
-        $thread_identifiers = array();
-
-        krsort($TWITTER_DDMM_OBJECT);
-        foreach ($TWITTER_DDMM_OBJECT as $twitter_dm_object) {
-            $id_sender = $twitter_dm_object['sender']['id'];
-            $id_recipient = $twitter_dm_object['recipient']['id'];
-            $identifier = ($id_sender == $ACCOUNT_PROFILE_ID) ? $id_recipient : $id_sender;
-
-            if (!in_array($identifier, $thread_identifiers)) {
-                $thread_identifiers[] = $identifier;
-
-                $twitter_tread_data = array();
-                $key_profile = ($id_sender == $ACCOUNT_PROFILE_ID) ? 'recipient' : 'sender';
-                $profile_data = $this->profileFromTwitterUser($twitter_dm_object[$key_profile]);
-
-                $twitter_tread_data['date'] = $twitter_dm_object['created_at'];
-                $twitter_tread_data['timeago'] = $this->getTimeAgo(strtotime($twitter_dm_object['created_at']));
-                $twitter_tread_data['identifier'] = $identifier;
-                $twitter_tread_data['network'] = 'twitter';
-                $twitter_tread_data['picture'] = $profile_data['picture'];
-                $twitter_tread_data['title'] = $profile_data['fullname'];
-                $twitter_tread_data['subtitle'] = '@' . $profile_data['username'];
-                $twitter_tread_data['preview'] = $twitter_dm_object['text'];
-                $twitter_tread_data['opened'] = false;
-                $twitter_tread_data['folder'] = 0;
-
-                $twitter_threads_data[] = $twitter_tread_data;
-            }
-        }
-
-        return $twitter_threads_data;
-    }
-
-    public function messagesFromTwitterDDMM($TWITTER_DDMM_OBJECT, $ACCOUNT_PROFILE_ID, $PROFILE_ID) {
+    public function threadMessagesFromMessages($MESSAGES_DATA, $ACCOUNT, $IDENTIFIER) {
         $messages_data = array();
 
-        ksort($TWITTER_DDMM_OBJECT);
-        foreach ($TWITTER_DDMM_OBJECT as $twitter_dm_object) {
-            $sender_id = $twitter_dm_object['sender']['id'];
-            $recipient_id = $twitter_dm_object['recipient']['id'];
-            $profile_id = ($sender_id == $ACCOUNT_PROFILE_ID) ? $recipient_id : $sender_id;
+        foreach ($MESSAGES_DATA as $message_data) {
+            $sender_id = $message_data['sender_id'];
+            $recipient_id = $message_data['recipient_id'];
+            $profile_id = ($sender_id == $ACCOUNT['identifier']) ? $recipient_id : $sender_id;
 
-            if ($PROFILE_ID == $profile_id) {
-                $message_data = array();
-
-                $message_data['identifier'] = $twitter_dm_object['id'];
-                $message_data['network'] = 'twitter';
-                $message_data['sender_id'] = $sender_id;
-                $message_data['recipient_id'] = $recipient_id;
-                $message_data['created'] = $twitter_dm_object['created_at'];
-                $message_data['timeago'] = $this->getTimeAgo(strtotime($twitter_dm_object['created_at']));
-                $message_data['text'] = $twitter_dm_object['text'];
-                $message_data['sent'] = ($sender_id == $ACCOUNT_PROFILE_ID) ? true : false;
-
+            if ($IDENTIFIER == $profile_id) {
+                $message_data['timeago'] = $this->getTimeAgo(strtotime($message_data['created']));
+                $message_data['sent'] = ($sender_id == $ACCOUNT['identifier']) ? true : false;
                 $messages_data[] = $message_data;
             }
         }
 
+        usort($messages_data, 'Data::sortMessages');
         return $messages_data;
     }
 
-    public function threadsTwitterExtend($TWITTER_THREADS_DATA, $THREADS_DATA) {
+    public function threadsFromMessages($MESSAGES_DATA, $ACCOUNT) {
+        $messages_threads_data = array();
+        $thread_identifiers = array();
+
+        krsort($MESSAGES_DATA);
+        foreach ($MESSAGES_DATA as $message_data) {
+            $id_sender = $message_data['sender_id'];
+            $id_recipient = $message_data['recipient_id'];
+            $identifier = ($id_sender == $ACCOUNT['identifier']) ? $id_recipient : $id_sender;
+
+            if (!in_array($identifier, $thread_identifiers)) {
+                $thread_identifiers[] = $identifier;
+
+                $message_thread_data = array();
+                $message_thread_data['date'] = $message_data['created'];
+                $message_thread_data['timeago'] = $this->getTimeAgo(strtotime($message_data['created']));
+                $message_thread_data['identifier'] = $identifier;
+                $message_thread_data['preview'] = $message_data['text'];
+                $message_thread_data['opened'] = false;
+                $message_thread_data['folder'] = 0;
+
+                $messages_threads_data[] = $message_thread_data;
+            }
+        }
+
+        return $messages_threads_data;
+    }
+
+    public function threadsMerge($MESSAGES_THREADS_DATA, $THREADS_DATA, $ACCOUNT) {
         $threads_data = array();
         $match_keys = array();
 
         foreach ($THREADS_DATA as $id => $thread_data) {
-            $match_keys[$thread_data['network'] . '_' . $thread_data['identifier']] = $id;
+            $match_keys[$thread_data['identifier']] = $id;
         }
 
-        foreach ($TWITTER_THREADS_DATA as $id => $twitter_thread_data) {
-            $match_key = $match_keys[$twitter_thread_data['network'] . '_' . $twitter_thread_data['identifier']];
-            $thread_data = $twitter_thread_data;
+        foreach ($MESSAGES_THREADS_DATA as $id => $message_thread_data) {
+            $thread_data = $message_thread_data;
 
-            if (isset($THREADS_DATA[$match_key])) {
-                $thread_data['opened'] = ($THREADS_DATA[$match_key]['opened'])? true : false;
+            if (isset($match_keys[$message_thread_data['identifier']])) {
+                $match_key = $match_keys[$message_thread_data['identifier']];
+                $thread_data['opened'] = ($THREADS_DATA[$match_key]['opened']) ? true : false;
                 $thread_data['folder'] = $THREADS_DATA[$match_key]['folder'];
             }
 
             $threads_data[] = $thread_data;
         }
 
+        usort($threads_data, 'Data::sortThreads');
         return $threads_data;
     }
 
@@ -236,6 +220,20 @@ class Data {
             return "now";
 
         return "$difference $periods[$j]";
+    }
+
+    private function sortMessages($thread_a, $thread_b) {
+        if ($thread_a['created'] == $thread_b['created']) {
+            return 0;
+        }
+        return ($thread_a['created'] < $thread_b['created']) ? -1 : 1;
+    }
+
+    private function sortThreads($thread_a, $thread_b) {
+        if ($thread_a['date'] == $thread_b['date']) {
+            return 0;
+        }
+        return ($thread_a['date'] > $thread_b['date']) ? -1 : 1;
     }
 
 }
