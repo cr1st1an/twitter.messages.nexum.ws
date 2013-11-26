@@ -105,12 +105,11 @@ class Data {
         $account_data['fullname'] = $ACCOUNT_DATA['fullname'];
         $account_data['username'] = $ACCOUNT_DATA['username'];
         $account_data['picture'] = $ACCOUNT_DATA['picture'];
-        $account_data['self'] = ((isset($ACTIVE_ACCOUNT['id_account']) && ($ACTIVE_ACCOUNT['id_account'] = $ACCOUNT_DATA['id_account'])) ? true : false);
 
         return $account_data;
     }
 
-    public function profileFromTwitterUser($TWITTER_USER_OBJECT, $FOLLOWERS_IDS = array(), $FRIENDS_IDS = array()) {
+    public function profileFromTwitterUser($TWITTER_USER_OBJECT, $ACCOUNT_IDENTIFIER = NULL, $FOLLOWERS_IDS = array(), $FRIENDS_IDS = array()) {
         $profile_data = array();
 
         $profile_data['identifier'] = $TWITTER_USER_OBJECT['id_str'];
@@ -123,6 +122,7 @@ class Data {
         $profile_data['count_followers'] = $TWITTER_USER_OBJECT['followers_count'];
         $profile_data['follower'] = (in_array($profile_data['identifier'], $FOLLOWERS_IDS) ? true : false);
         $profile_data['following'] = (in_array($profile_data['identifier'], $FRIENDS_IDS) ? true : false);
+        $profile_data['own'] = ($profile_data['identifier'] == $ACCOUNT_IDENTIFIER ? true : false);
         
         return $profile_data;
     }
@@ -150,7 +150,7 @@ class Data {
         $messages_threads_data = array();
         $thread_identifiers = array();
 
-        krsort($MESSAGES_DATA);
+        usort($MESSAGES_DATA, 'Data::sortMessagesReverse');
         foreach ($MESSAGES_DATA as $message_data) {
             $id_sender = $message_data['sender_id'];
             $id_recipient = $message_data['recipient_id'];
@@ -174,10 +174,10 @@ class Data {
         return $messages_threads_data;
     }
 
-    public function threadsMerge($MESSAGES_THREADS_DATA, $THREADS_DATA, $ACCOUNT) {
+    public function threadsMerge($MESSAGES_THREADS_DATA, $THREADS_DATA) {
         $threads_data = array();
         $match_keys = array();
-
+        
         foreach ($THREADS_DATA as $id => $thread_data) {
             $match_keys[$thread_data['identifier']] = $id;
         }
@@ -221,12 +221,19 @@ class Data {
 
         return "$difference $periods[$j]";
     }
-
+    
     private function sortMessages($thread_a, $thread_b) {
         if ($thread_a['created'] == $thread_b['created']) {
             return 0;
         }
         return ($thread_a['created'] < $thread_b['created']) ? -1 : 1;
+    }
+    
+    private function sortMessagesReverse($thread_a, $thread_b) {
+        if ($thread_a['created'] == $thread_b['created']) {
+            return 0;
+        }
+        return ($thread_a['created'] > $thread_b['created']) ? -1 : 1;
     }
 
     private function sortThreads($thread_a, $thread_b) {

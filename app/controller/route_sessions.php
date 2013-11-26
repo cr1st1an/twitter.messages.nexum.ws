@@ -78,7 +78,7 @@ class Route_Sessions {
                         $response = $r_selectOne_3;
                     } else {
                         $account_data = $r_selectOne_3['account_data'];
-                        $profile_data = $Data->profileFromTwitterUser($r_apiGet_AVC['api_data']);
+                        $profile_data = $Data->profileFromTwitterUser($r_apiGet_AVC['api_data'], $account_data['identifier']);
                     }
                 }
             }

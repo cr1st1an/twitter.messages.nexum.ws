@@ -37,7 +37,7 @@ class Route_Profiles {
             if (!$r_getUserShow['success']) {
                 $response = $r_getUserShow;
             } else {
-                $profile_data = $Data->profileFromTwitterUser($r_getUserShow['twitter_profile_data']);
+                $profile_data = $Data->profileFromTwitterUser($r_getUserShow['twitter_profile_data'], $session['account']['identifier']);
             }
         }
 

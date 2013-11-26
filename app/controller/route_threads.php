@@ -40,7 +40,7 @@ class Route_Threads {
             if (!$r_selectAll_2['success']) {
                 $response = $r_selectAll_2;
             } else {
-                $threads_data = $Data->threadsMerge($messages_threads_data, $r_selectAll_2['threads_data'], $session['account']);
+                $threads_data = $Data->threadsMerge($messages_threads_data, $r_selectAll_2['threads_data']);
             }
         }
 
@@ -48,7 +48,7 @@ class Route_Threads {
             foreach ($threads_data as $id => $thread_data) {
                 $r_getUserShow = $MC_Lib_Twitter->getUserShow($thread_data['identifier'], $session['account']['credentials']);
                 if ($r_getUserShow['success']) {
-                    $profile_data = $Data->profileFromTwitterUser($r_getUserShow['twitter_profile_data']);
+                    $profile_data = $Data->profileFromTwitterUser($r_getUserShow['twitter_profile_data'], $session['account']['identifier']);
                     $threads_data[$id]['picture'] = $profile_data['picture'];
                     $threads_data[$id]['title'] = $profile_data['fullname'];
                     $threads_data[$id]['subtitle'] = '@' . $profile_data['username'];

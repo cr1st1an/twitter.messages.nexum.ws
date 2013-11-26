@@ -4,116 +4,6 @@ class MC_Lib_Twitter {
 
     protected $_name = 'Lib_Twitter_';
 
-//    public function getDirectMessages($ACCOUNT_ID, $CREDENTIALS, $FETCH = true) {
-//        include_once Epi::getPath('lib') . 'Twitter.php';
-//
-//        $Twitter = new Twitter();
-//
-//        $response = array();
-//        $twitter_ddmm_data = array();
-//
-//        $account_id = (int) $ACCOUNT_ID;
-//        if (empty($response) && empty($account_id)) {
-//            $response['success'] = false;
-//            $response['message'] = "Required value ACCOUNT_ID is missing in MC_Api_Twitter->getDirectMessages()";
-//            $response['err'] = 0;
-//        }
-//
-//        if (empty($response)) {
-//            $key = $this->_name . 'getDirectMessages_' . $account_id;
-//
-//            $cached_data = getCache()->get($key);
-//            if (!$cached_data && $FETCH) {
-//                $params = array();
-//                $params['count'] = 200;
-//                do {
-//                    $twitter_ddmm_in_data = array();
-//                    $r_apiGet_DM = $Twitter->apiGet('direct_messages', $params, $CREDENTIALS);
-//
-//                    if ($r_apiGet_DM['success']) {
-//                        $twitter_ddmm_in_data = $r_apiGet_DM['api_data'];
-//                        foreach ($twitter_ddmm_in_data as $twitter_dm_data) {
-//                            $twitter_ddmm_data[$twitter_dm_data['id']] = $twitter_dm_data;
-//                            if (!isset($params['max_id']) || $params['max_id'] > $twitter_dm_data['id'])
-//                                $params['max_id'] = $twitter_dm_data['id'];
-//                        }
-//                    }
-//                } while (APP_PAGE_ITEMS <= count($twitter_ddmm_in_data));
-//
-//                $params = array();
-//                $params['count'] = 200;
-//                do {
-//                    $twitter_ddmm_out_data = array();
-//                    $r_apiGet_DMS = $Twitter->apiGet('direct_messages/sent', $params, $CREDENTIALS);
-//
-//                    if ($r_apiGet_DMS['success']) {
-//                        $twitter_ddmm_out_data = $r_apiGet_DMS['api_data'];
-//                        foreach ($twitter_ddmm_out_data as $twitter_dm_data) {
-//                            $twitter_ddmm_data[$twitter_dm_data['id']] = $twitter_dm_data;
-//                            if (!isset($params['max_id']) || $params['max_id'] > $twitter_dm_data['id'])
-//                                $params['max_id'] = $twitter_dm_data['id'];
-//                        }
-//                    }
-//                } while (APP_PAGE_ITEMS <= count($twitter_ddmm_out_data));
-//
-//                if (!empty($twitter_ddmm_data))
-//                    getCache()->set($key, $twitter_ddmm_data);
-//            } else if ($FETCH) {
-//                $twitter_ddmm_data = $cached_data;
-//                $top_dm_data = array_slice($twitter_ddmm_data, 0, 1);
-//
-//                $params = array();
-//                $params['count'] = 200;
-//                $params['since_id'] = $top_dm_data[0]['id'];
-//                do {
-//                    $twitter_ddmm_in_data = array();
-//                    $r_apiGet_DM = $Twitter->apiGet('direct_messages', $params, $CREDENTIALS);
-//
-//                    if ($r_apiGet_DM['success']) {
-//                        $twitter_ddmm_in_data = $r_apiGet_DM['api_data'];
-//                        foreach ($twitter_ddmm_in_data as $twitter_dm_data) {
-//                            $twitter_ddmm_data[$twitter_dm_data['id']] = $twitter_dm_data;
-//                            if ($params['since_id'] < $twitter_dm_data['id'])
-//                                $params['since_id'] = $twitter_dm_data['id'];
-//                        }
-//                    }
-//                } while (APP_PAGE_ITEMS <= count($twitter_ddmm_in_data));
-//
-//                $params = array();
-//                $params['count'] = 200;
-//                $params['since_id'] = $top_dm_data[0]['id'];
-//                do {
-//                    $twitter_ddmm_out_data = array();
-//                    $r_apiGet_DMS = $Twitter->apiGet('direct_messages/sent', $params, $CREDENTIALS);
-//
-//                    if ($r_apiGet_DMS['success']) {
-//                        $twitter_ddmm_out_data = $r_apiGet_DMS['api_data'];
-//                        foreach ($twitter_ddmm_out_data as $twitter_dm_data) {
-//                            $twitter_ddmm_data[$twitter_dm_data['id']] = $twitter_dm_data;
-//                            if ($params['since_id'] < $twitter_dm_data['id'])
-//                                $params['since_id'] = $twitter_dm_data['id'];
-//                        }
-//                    }
-//                } while (APP_PAGE_ITEMS <= count($twitter_ddmm_out_data));
-//
-//                if (!empty($twitter_ddmm_data))
-//                    getCache()->set($key, $twitter_ddmm_data);
-//            } else {
-//                $twitter_ddmm_data = $cached_data;
-//            }
-//
-//            $twitter_ddmm_data = array_filter($twitter_ddmm_data);
-//        }
-//
-//        if (empty($response)) {
-//            $response['success'] = true;
-//            $response['message'] = "Here are the direct messages for your account [MC]";
-//            $response['twitter_ddmm_data'] = $twitter_ddmm_data;
-//        }
-//
-//        return $response;
-//    }
-
     public function getFriendsIds($PROFILE_ID, $CREDENTIALS, $FETCH = true) {
         include_once Epi::getPath('lib') . 'Twitter.php';
 
@@ -345,6 +235,42 @@ class MC_Lib_Twitter {
             $response['success'] = true;
             $response['message'] = "Here are the requested profiles with ids '$followers_ids_str' [MC]";
             $response['twitter_profiles_data'] = $twitter_profiles_data;
+        }
+
+        return $response;
+    }
+
+    public function postFriendshipCreate($PROFILE_ID, $ACCOUNT) {
+        include_once Epi::getPath('lib') . 'Twitter.php';
+
+        $Twitter = new Twitter();
+
+        $response = array();
+
+        $profile_id = (int) $PROFILE_ID;
+        if (empty($response) && empty($profile_id)) {
+            $response['success'] = false;
+            $response['message'] = "Required value PROFILE_ID is missing in MC_Api_Twitter->postFriendshipCreate()";
+            $response['err'] = 0;
+        }
+
+        if (empty($response)) {
+            $r_apiPost_FC = $Twitter->apiPost('friendships/create', array('user_id' => $profile_id), $ACCOUNT['credentials']);
+            if (!$r_apiPost_FC['success']) {
+                $response['success'] = false;
+                $response['message'] = "Couldn't complete the request [MC]";
+                $response['err'] = 0;
+            } else {
+                $key_a = $this->_name . 'getFriendsIds_' . $ACCOUNT['identifier'];
+                getCache()->delete($key_a);
+                $key_b = $this->_name . 'getFollowersIds_' . $ACCOUNT['identifier'];
+                getCache()->delete($key_b);
+            }
+        }
+        
+        if (empty($response)) {
+            $response['success'] = true;
+            $response['message'] = "The relationship has been created [MC]";
         }
 
         return $response;
