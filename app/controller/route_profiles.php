@@ -14,6 +14,8 @@ class Route_Profiles {
         $response = array();
         $session = $Session->get();
         $get = array();
+        $session_followers_ids = array();
+        $session_friends_ids = array();
         $profile_data = array();
 
         if (empty($response) && empty($session['account'])) {
@@ -33,11 +35,27 @@ class Route_Profiles {
         }
 
         if (empty($response)) {
+            $r_getFollowersIds = $MC_Lib_Twitter->getFollowersIds($session['account']['identifier'], $session['account']['credentials']);
+            if ($r_getFollowersIds['success']) {
+                $session_followers_ids = $r_getFollowersIds['followers_ids'];
+            }
+        }
+        
+        if (empty($response)) {
+            $r_getFriendsIds = $MC_Lib_Twitter->getFriendsIds($session['account']['identifier'], $session['account']['credentials']);
+            if (!$r_getFriendsIds['success']) {
+                $response = $r_getFriendsIds;
+            } else {
+                $session_friends_ids = $r_getFriendsIds['friends_ids'];
+            }
+        }
+
+        if (empty($response)) {
             $r_getUserShow = $MC_Lib_Twitter->getUserShow($get['identifier'], $session['account']['credentials']);
             if (!$r_getUserShow['success']) {
                 $response = $r_getUserShow;
             } else {
-                $profile_data = $Data->profileFromTwitterUser($r_getUserShow['twitter_profile_data'], $session['account']['identifier']);
+                $profile_data = $Data->profileFromTwitterUser($r_getUserShow['twitter_profile_data'], $session['account']['identifier'], $session_followers_ids, $session_friends_ids);
             }
         }
 

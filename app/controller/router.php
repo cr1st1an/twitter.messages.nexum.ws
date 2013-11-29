@@ -6,6 +6,7 @@ include_once Epi::getPath('controller') . 'route_messages.php';
 include_once Epi::getPath('controller') . 'route_profiles.php';
 include_once Epi::getPath('controller') . 'route_sessions.php';
 include_once Epi::getPath('controller') . 'route_static.php';
+include_once Epi::getPath('controller') . 'route_statuses.php';
 include_once Epi::getPath('controller') . 'route_threads.php';
 include_once Epi::getPath('controller') . 'route_workers.php';
 
@@ -24,6 +25,7 @@ getApi()->post('/1.0/contacts/follow', array('Route_Contacts', 'postFollow'), Ep
 getApi()->post('/1.0/messages', array('Route_Messages', 'postRoot'), EpiApi::external);
 getApi()->post('/1.0/sessions', array('Route_Sessions', 'postRoot'), EpiApi::external);
 getApi()->post('/1.0/sessions/auth', array('Route_Sessions', 'postAuth'), EpiApi::external);
+getApi()->post('/1.0/statuses/update', array('Route_Statuses', 'postRoot'), EpiApi::external);
 
 /* WORKERS */
 getApi()->post('/1.0/workers/01', array('Route_Workers', 'post01'), EpiApi::external);

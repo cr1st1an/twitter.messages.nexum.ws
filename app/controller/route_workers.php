@@ -158,8 +158,8 @@ class Route_Workers {
             $params['type'] = 'ios';
             $params['data'] = array();
             $params['data']['alert'] = $alert;
-            $params['data']['badge'] = 1;
-            $params['data']['sound'] = 'default';
+            $params['data']['badge'] = 'Increment';
+            $params['data']['sound'] = 'newdm.aif';
             $params['data']['recipient'] = $message_data['recipient_id'];
             $params['data']['sender'] = $profile_data['identifier'];
             $Parse->apiPost('push', $params);

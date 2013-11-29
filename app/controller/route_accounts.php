@@ -55,6 +55,7 @@ class Route_Accounts {
             $params['deviceType'] = 'ios';
             $params['deviceToken'] = $post['device_token'];
             $params['channels'] = $channels;
+            $params['badge'] = 0;
 
             $r_postApi_I = $Parse->apiPost('installations', $params);
 

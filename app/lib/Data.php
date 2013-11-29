@@ -197,7 +197,7 @@ class Data {
         usort($threads_data, 'Data::sortThreads');
         return $threads_data;
     }
-
+    
     public function getTimeAgo($TIME) {
         $periods = array("second", "minute", "hour", "day", "week", "month", "year", "decade");
         $lengths = array("60", "60", "24", "7", "4.35", "12", "10");
