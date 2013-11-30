@@ -383,4 +383,77 @@ class Route_Contacts {
         return $response;
     }
     
+    public static function postUnfollow(){
+        include_once Epi::getPath('data') . 'mc_lib_twitter.php';
+        include_once Epi::getPath('lib') . 'Data.php';
+        include_once Epi::getPath('lib') . 'Session.php';
+        
+        $MC_Lib_Twitter = new MC_Lib_Twitter();
+        $Data = new Data();
+        $Session = new Session();
+        
+        $response = array();
+        $session = $Session->get();
+        $post = array();
+        
+        if (empty($response) && empty($session['account'])) {
+            $response['success'] = false;
+            $response['message'] = "You need to login first";
+            $response['err'] = 0;
+        }
+        
+        if (empty($response)) {
+            $r_getPostParams = $Data->getPostParams(array('identifier'), array());
+
+            if (!$r_getPostParams['success']) {
+                $response = $r_getPostParams;
+            } else {
+                $post = $r_getPostParams['post'];
+            }
+        }
+        
+        if(empty($response)){
+            $response = $MC_Lib_Twitter->postFriendshipDestroy($post['identifier'], $session['account']);
+        }
+        
+        return $response;
+    }
+    
+    
+    public static function postBlock(){
+        include_once Epi::getPath('data') . 'mc_lib_twitter.php';
+        include_once Epi::getPath('lib') . 'Data.php';
+        include_once Epi::getPath('lib') . 'Session.php';
+        
+        $MC_Lib_Twitter = new MC_Lib_Twitter();
+        $Data = new Data();
+        $Session = new Session();
+        
+        $response = array();
+        $session = $Session->get();
+        $post = array();
+        
+        if (empty($response) && empty($session['account'])) {
+            $response['success'] = false;
+            $response['message'] = "You need to login first";
+            $response['err'] = 0;
+        }
+        
+        if (empty($response)) {
+            $r_getPostParams = $Data->getPostParams(array('identifier'), array());
+
+            if (!$r_getPostParams['success']) {
+                $response = $r_getPostParams;
+            } else {
+                $post = $r_getPostParams['post'];
+            }
+        }
+        
+        if(empty($response)){
+            $response = $MC_Lib_Twitter->postBlockCreate($post['identifier'], $session['account']);
+        }
+        
+        return $response;
+    }
+    
 }

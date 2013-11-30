@@ -22,6 +22,8 @@ getApi()->get('/1.0/threads', array('Route_Threads', 'getRoot'), EpiApi::externa
 
 getApi()->post('/1.0/accounts/device_token', array('Route_Accounts', 'postDeviceToken'), EpiApi::external);
 getApi()->post('/1.0/contacts/follow', array('Route_Contacts', 'postFollow'), EpiApi::external);
+getApi()->post('/1.0/contacts/unfollow', array('Route_Contacts', 'postUnfollow'), EpiApi::external);
+getApi()->post('/1.0/contacts/block', array('Route_Contacts', 'postBlock'), EpiApi::external);
 getApi()->post('/1.0/messages', array('Route_Messages', 'postRoot'), EpiApi::external);
 getApi()->post('/1.0/sessions', array('Route_Sessions', 'postRoot'), EpiApi::external);
 getApi()->post('/1.0/sessions/auth', array('Route_Sessions', 'postAuth'), EpiApi::external);

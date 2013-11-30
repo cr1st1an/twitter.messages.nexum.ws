@@ -265,12 +265,96 @@ class MC_Lib_Twitter {
                 getCache()->delete($key_a);
                 $key_b = $this->_name . 'getFollowersIds_' . $ACCOUNT['identifier'];
                 getCache()->delete($key_b);
+                $key_c = $this->_name . 'getFriendsIds_' . $profile_id;
+                getCache()->delete($key_c);
+                $key_d = $this->_name . 'getFollowersIds_' . $profile_id;
+                getCache()->delete($key_d);
             }
         }
         
         if (empty($response)) {
             $response['success'] = true;
             $response['message'] = "The relationship has been created [MC]";
+        }
+
+        return $response;
+    }
+
+    public function postFriendshipDestroy($PROFILE_ID, $ACCOUNT) {
+        include_once Epi::getPath('lib') . 'Twitter.php';
+
+        $Twitter = new Twitter();
+
+        $response = array();
+
+        $profile_id = (int) $PROFILE_ID;
+        if (empty($response) && empty($profile_id)) {
+            $response['success'] = false;
+            $response['message'] = "Required value PROFILE_ID is missing in MC_Api_Twitter->postFriendshipDestroy()";
+            $response['err'] = 0;
+        }
+
+        if (empty($response)) {
+            $r_apiPost_FC = $Twitter->apiPost('friendships/destroy', array('user_id' => $profile_id), $ACCOUNT['credentials']);
+            if (!$r_apiPost_FC['success']) {
+                $response['success'] = false;
+                $response['message'] = "Couldn't complete the request [MC]";
+                $response['err'] = 0;
+            } else {
+                $key_a = $this->_name . 'getFriendsIds_' . $ACCOUNT['identifier'];
+                getCache()->delete($key_a);
+                $key_b = $this->_name . 'getFollowersIds_' . $ACCOUNT['identifier'];
+                getCache()->delete($key_b);
+                $key_c = $this->_name . 'getFriendsIds_' . $profile_id;
+                getCache()->delete($key_c);
+                $key_d = $this->_name . 'getFollowersIds_' . $profile_id;
+                getCache()->delete($key_d);
+            }
+        }
+        
+        if (empty($response)) {
+            $response['success'] = true;
+            $response['message'] = "The relationship has been destroyed [MC]";
+        }
+
+        return $response;
+    }
+
+    public function postBlockCreate($PROFILE_ID, $ACCOUNT) {
+        include_once Epi::getPath('lib') . 'Twitter.php';
+
+        $Twitter = new Twitter();
+
+        $response = array();
+
+        $profile_id = (int) $PROFILE_ID;
+        if (empty($response) && empty($profile_id)) {
+            $response['success'] = false;
+            $response['message'] = "Required value PROFILE_ID is missing in MC_Api_Twitter->postBlockCreate()";
+            $response['err'] = 0;
+        }
+
+        if (empty($response)) {
+            $r_apiPost_FC = $Twitter->apiPost('blocks/create', array('user_id' => $profile_id), $ACCOUNT['credentials']);
+            if (!$r_apiPost_FC['success']) {
+                $response['success'] = false;
+                $response['message'] = "Couldn't complete the request [MC]";
+                $response['err'] = 0;
+            } else {
+                $key_a = $this->_name . 'getFriendsIds_' . $ACCOUNT['identifier'];
+                getCache()->delete($key_a);
+                $key_b = $this->_name . 'getFollowersIds_' . $ACCOUNT['identifier'];
+                getCache()->delete($key_b);
+                $key_c = $this->_name . 'getFriendsIds_' . $profile_id;
+                getCache()->delete($key_c);
+                $key_d = $this->_name . 'getFollowersIds_' . $profile_id;
+                getCache()->delete($key_d);
+            }
+        }
+        
+        if (empty($response)) {
+            $response['success'] = true;
+            $response['message'] = "The profile has been blocked [MC]";
         }
 
         return $response;
