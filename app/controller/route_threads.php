@@ -48,10 +48,13 @@ class Route_Threads {
             foreach ($threads_data as $id => $thread_data) {
                 $r_getUserShow = $MC_Lib_Twitter->getUserShow($thread_data['identifier'], $session['account']['credentials']);
                 if ($r_getUserShow['success']) {
-                    $profile_data = $Data->profileFromTwitterUser($r_getUserShow['twitter_profile_data'], $session['account']['identifier']);
+                    $profiles_data = $Data->profilesFromTwitterUsers(array($r_getUserShow['twitter_profile_data']), $session['account']);
+                    $profile_data = array_pop($profiles_data);
+                    
                     $threads_data[$id]['picture'] = $profile_data['picture'];
                     $threads_data[$id]['title'] = $profile_data['fullname'];
                     $threads_data[$id]['subtitle'] = '@' . $profile_data['username'];
+                    $threads_data[$id]['profile_data'] = $profile_data;
                 }
             }
         }

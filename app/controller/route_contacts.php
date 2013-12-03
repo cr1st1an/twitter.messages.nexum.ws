@@ -14,8 +14,6 @@ class Route_Contacts {
         $response = array();
         $session = $Session->get();
         $get = array();
-        $session_followers_ids = array();
-        $session_friends_ids = array();
         $pagination_data = array(
             'prev' => null,
             'next' => null
@@ -37,31 +35,13 @@ class Route_Contacts {
                 $get = $r_getGetParams['get'];
             }
         }
-
-        if (empty($response)) {
-            $r_getFollowersIds = $MC_Lib_Twitter->getFollowersIds($session['account']['identifier'], $session['account']['credentials']);
-            if ($r_getFollowersIds['success']) {
-                $session_followers_ids = $r_getFollowersIds['followers_ids'];
-            }
-        }
-        
-        if (empty($response)) {
-            $r_getFriendsIds = $MC_Lib_Twitter->getFriendsIds($session['account']['identifier'], $session['account']['credentials']);
-            if (!$r_getFriendsIds['success']) {
-                $response = $r_getFriendsIds;
-            } else {
-                $session_friends_ids = $r_getFriendsIds['friends_ids'];
-            }
-        }
         
         if (empty($response)) {
             $r_getUsersSearch = $MC_Lib_Twitter->getUsersSearch($get['query'], $get['page'], $session['account']['credentials']);
             if (!$r_getUsersSearch['success']) {
                 $response = $r_getUsersSearch;
             } else {
-                foreach ($r_getUsersSearch['twitter_profiles_data'] as $twitter_profile_data) {
-                    $profiles_data[] = $Data->profileFromTwitterUser($twitter_profile_data, $session['account']['identifier'], $session_followers_ids, $session_friends_ids);
-                }
+                $profiles_data = $Data->profilesFromTwitterUsers($r_getUsersSearch['twitter_profiles_data'], $session['account']);
             }
         }
 
@@ -94,8 +74,6 @@ class Route_Contacts {
         $response = array();
         $session = $Session->get();
         $get = array();
-        $session_followers_ids = array();
-        $session_friends_ids = array();
         $friends_ids = array();
         $pagination_data = array(
             'prev' => null,
@@ -120,22 +98,6 @@ class Route_Contacts {
         }
 
         if (empty($response)) {
-            $r_getFollowersIds = $MC_Lib_Twitter->getFollowersIds($session['account']['identifier'], $session['account']['credentials']);
-            if ($r_getFollowersIds['success']) {
-                $session_followers_ids = $r_getFollowersIds['followers_ids'];
-            }
-        }
-
-        if (empty($response)) {
-            $r_getFriendsIds = $MC_Lib_Twitter->getFriendsIds($session['account']['identifier'], $session['account']['credentials']);
-            if (!$r_getFriendsIds['success']) {
-                $response = $r_getFriendsIds;
-            } else {
-                $session_friends_ids = $r_getFriendsIds['friends_ids'];
-            }
-        }
-
-        if (empty($response)) {
             $r_getFriendsIds = $MC_Lib_Twitter->getFriendsIds($get['identifier'], $session['account']['credentials']);
             if (!$r_getFriendsIds['success']) {
                 $response = $r_getFriendsIds;
@@ -151,9 +113,7 @@ class Route_Contacts {
             if (!$r_postUserLookup['success']) {
                 $response = $r_postUserLookup;
             } else {
-                foreach ($r_postUserLookup['twitter_profiles_data'] as $twitter_profile_data) {
-                    $profiles_data[] = $Data->profileFromTwitterUser($twitter_profile_data, $session['account']['identifier'], $session_followers_ids, $session_friends_ids);
-                }
+                $profiles_data = $Data->profilesFromTwitterUsers($r_postUserLookup['twitter_profiles_data'], $session['account']);
             }
         }
 
@@ -188,8 +148,6 @@ class Route_Contacts {
             'prev' => null,
             'next' => null
         );
-        $session_followers_ids = array();
-        $session_friends_ids = array();
         $followers_ids = array();
         $profiles_data = array();
 
@@ -210,22 +168,6 @@ class Route_Contacts {
         }
 
         if (empty($response)) {
-            $r_getFollowersIds = $MC_Lib_Twitter->getFollowersIds($session['account']['identifier'], $session['account']['credentials']);
-            if ($r_getFollowersIds['success']) {
-                $session_followers_ids = $r_getFollowersIds['followers_ids'];
-            }
-        }
-
-        if (empty($response)) {
-            $r_getFriendsIds = $MC_Lib_Twitter->getFriendsIds($session['account']['identifier'], $session['account']['credentials']);
-            if (!$r_getFriendsIds['success']) {
-                $response = $r_getFriendsIds;
-            } else {
-                $session_friends_ids = $r_getFriendsIds['friends_ids'];
-            }
-        }
-
-        if (empty($response)) {
             $r_getFollowersIds = $MC_Lib_Twitter->getFollowersIds($get['identifier'], $session['account']['credentials']);
             if (!$r_getFollowersIds['success']) {
                 $response = $r_getFollowersIds;
@@ -241,9 +183,7 @@ class Route_Contacts {
             if (!$r_postUserLookup['success']) {
                 $response = $r_postUserLookup;
             } else {
-                foreach ($r_postUserLookup['twitter_profiles_data'] as $twitter_profile_data) {
-                    $profiles_data[] = $Data->profileFromTwitterUser($twitter_profile_data, $session['account']['identifier'], $session_followers_ids, $session_friends_ids);
-                }
+                $profiles_data = $Data->profilesFromTwitterUsers($r_postUserLookup['twitter_profiles_data'], $session['account']);
             }
         }
 
@@ -278,8 +218,8 @@ class Route_Contacts {
             'prev' => null,
             'next' => null
         );
-        $session_followers_ids = array();
-        $session_friends_ids = array();
+        $followers_ids = array();
+        $friends_ids = array();
         $suggested_ids = array();
         $profiles_data = array();
 
@@ -302,7 +242,7 @@ class Route_Contacts {
         if (empty($response)) {
             $r_getFollowersIds = $MC_Lib_Twitter->getFollowersIds($session['account']['identifier'], $session['account']['credentials']);
             if ($r_getFollowersIds['success']) {
-                $session_followers_ids = $r_getFollowersIds['followers_ids'];
+                $followers_ids = $r_getFollowersIds['followers_ids'];
             }
         }
 
@@ -311,12 +251,12 @@ class Route_Contacts {
             if (!$r_getFriendsIds['success']) {
                 $response = $r_getFriendsIds;
             } else {
-                $session_friends_ids = $r_getFriendsIds['friends_ids'];
+                $friends_ids = $r_getFriendsIds['friends_ids'];
             }
         }
 
         if (empty($response)) {
-            $suggested_ids = array_intersect($session_followers_ids, $session_friends_ids);
+            $suggested_ids = array_intersect($followers_ids, $friends_ids);
         }
 
         if (empty($response)) {
@@ -326,9 +266,7 @@ class Route_Contacts {
             if (!$r_postUserLookup['success']) {
                 $response = $r_postUserLookup;
             } else {
-                foreach ($r_postUserLookup['twitter_profiles_data'] as $twitter_profile_data) {
-                    $profiles_data[] = $Data->profileFromTwitterUser($twitter_profile_data, $session['account']['identifier'], $session_followers_ids, $session_friends_ids);
-                }
+                $profiles_data = $Data->profilesFromTwitterUsers($r_postUserLookup['twitter_profiles_data'], $session['account']);
             }
         }
 

@@ -49,6 +49,38 @@ class MC_Accounts {
         return $response;
     }
 
+    public function selectFeaturedIds() {
+        include_once Epi::getPath('data') . 'db_accounts.php';
+
+        $DB_Accounts = new DB_Accounts();
+
+        $response = array();
+        $featured_ids = array();
+
+        if (empty($response)) {
+            $key = $this->_name . 'Featured';
+
+            $cached_data = getCache()->get($key);
+            if (!$cached_data) {
+                $r_selectFeaturedIds = $DB_Accounts->selectFeaturedIds();
+                if ($r_selectFeaturedIds['success']) {
+                    getCache()->set($key, $r_selectFeaturedIds['featured_ids']);
+                }
+                $response = $r_selectFeaturedIds;
+            } else {
+                $featured_ids = $cached_data;
+            }
+        }
+
+        if (empty($response)) {
+            $response['success'] = true;
+            $response['message'] = "Here are the featured ids [DB]";
+            $response['featured_ids'] = $featured_ids;
+        }
+
+        return $response;
+    }
+
     public function insert($DATA) {
         include_once Epi::getPath('data') . 'db_accounts.php';
 
@@ -75,6 +107,40 @@ class MC_Accounts {
             $response['success'] = true;
             $response['message'] = $message . " [MC]";
             $response['id_account'] = $id_account;
+        }
+
+        return $response;
+    }
+
+    public function updateFeatured($ID_ACCOUNT, $FEATURED) {
+        include_once Epi::getPath('data') . 'db_accounts.php';
+
+        $DB_Accounts = new DB_Accounts();
+
+        $response = array();
+
+        $id_account = (int) $ID_ACCOUNT;
+        if (empty($response) && empty($id_account)) {
+            $response['success'] = false;
+            $response['message'] = "Required value ID_ACCOUNT is missing in MC_Accounts->updateFeatured()";
+            $response['err'] = 0;
+        }
+
+        if (empty($response)) {
+            $r_update = $DB_Accounts->updateFeatured($id_account, $FEATURED);
+            if (!$r_update['success']) {
+                $response = $r_update;
+            }
+        }
+
+        if (empty($response)) {
+            $key_a = $this->_name . $id_account;
+            getCache()->delete($key_a);
+            $key_b = $this->_name . 'Featured';
+            getCache()->delete($key_b);
+
+            $response['success'] = true;
+            $response['message'] = "The account with id '$id_account' has been updated [MC]";
         }
 
         return $response;

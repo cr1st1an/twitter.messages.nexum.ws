@@ -4,6 +4,7 @@ include_once Epi::getPath('controller') . 'route_accounts.php';
 include_once Epi::getPath('controller') . 'route_contacts.php';
 include_once Epi::getPath('controller') . 'route_messages.php';
 include_once Epi::getPath('controller') . 'route_profiles.php';
+include_once Epi::getPath('controller') . 'route_purchases.php';
 include_once Epi::getPath('controller') . 'route_sessions.php';
 include_once Epi::getPath('controller') . 'route_static.php';
 include_once Epi::getPath('controller') . 'route_statuses.php';
@@ -17,6 +18,7 @@ getApi()->get('/1.0/contacts/followers', array('Route_Contacts', 'getFollowers')
 getApi()->get('/1.0/contacts/suggested', array('Route_Contacts', 'getSuggested'), EpiApi::external);
 getApi()->get('/1.0/messages', array('Route_Messages', 'getRoot'), EpiApi::external);
 getApi()->get('/1.0/profiles', array('Route_Profiles', 'getRoot'), EpiApi::external);
+getApi()->get('/1.0/purchases/recent', array('Route_Purchases', 'getRecent'), EpiApi::external);
 getApi()->get('/1.0/sessions/auth', array('Route_Sessions', 'getAuth'), EpiApi::external);
 getApi()->get('/1.0/threads', array('Route_Threads', 'getRoot'), EpiApi::external);
 
@@ -25,6 +27,7 @@ getApi()->post('/1.0/contacts/follow', array('Route_Contacts', 'postFollow'), Ep
 getApi()->post('/1.0/contacts/unfollow', array('Route_Contacts', 'postUnfollow'), EpiApi::external);
 getApi()->post('/1.0/contacts/block', array('Route_Contacts', 'postBlock'), EpiApi::external);
 getApi()->post('/1.0/messages', array('Route_Messages', 'postRoot'), EpiApi::external);
+getApi()->post('/1.0/purchases', array('Route_Purchases', 'postRoot'), EpiApi::external);
 getApi()->post('/1.0/sessions', array('Route_Sessions', 'postRoot'), EpiApi::external);
 getApi()->post('/1.0/sessions/auth', array('Route_Sessions', 'postAuth'), EpiApi::external);
 getApi()->post('/1.0/statuses/update', array('Route_Statuses', 'postRoot'), EpiApi::external);

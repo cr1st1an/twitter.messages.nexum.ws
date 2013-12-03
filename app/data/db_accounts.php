@@ -41,6 +41,30 @@ class DB_Accounts {
         return $response;
     }
 
+    public function selectFeaturedIds() {
+        $response = array();
+        $featured_ids = array();
+
+        if (empty($response)) {
+            $featured_ids_arr = getDatabase()->all(
+                    'SELECT identifier FROM ' . $this->_name . ' WHERE featured=1'
+            );
+            if($featured_ids_arr){
+                foreach($featured_ids_arr as $featured_id){
+                    $featured_ids[] = $featured_id['identifier'];
+                }
+            }
+        }
+
+        if (empty($response)) {
+            $response['success'] = true;
+            $response['message'] = "Here are the featured ids [DB]";
+            $response['featured_ids'] = $featured_ids;
+        }
+        
+        return $response;
+    }
+
     public function insert($DATA) {
         $response = array();
         $id_account = null;
@@ -100,6 +124,32 @@ class DB_Accounts {
             $response['success'] = true;
             $response['message'] = $message;
             $response['id_account'] = $id_account;
+        }
+
+        return $response;
+    }
+
+    public function updateFeatured($ID_ACCOUNT, $FEATURED) {
+        $response = array();
+
+        $id_account = (int) $ID_ACCOUNT;
+        if (empty($response) && empty($id_account)) {
+            $response['success'] = false;
+            $response['message'] = "Required value ID_ACCOUNT is missing in DB_Accounts->updateFeatured()";
+            $response['err'] = 0;
+        }
+
+        $featured = (int) $FEATURED;
+
+        if (empty($response)) {
+            $update_data = array(
+                'id_account' => $id_account,
+                'featured' => $featured
+            );
+            getDatabase()->execute('UPDATE ' . $this->_name . ' SET featured=:featured WHERE id_account=:id_account', $update_data);
+
+            $response['success'] = true;
+            $response['message'] = "The account with id '$id_account' has been updated [DB]";
         }
 
         return $response;

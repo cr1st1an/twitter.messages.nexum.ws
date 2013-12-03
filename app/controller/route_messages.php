@@ -41,7 +41,8 @@ class Route_Messages {
             if (!$r_getUserShow['success']) {
                 $response = $r_getUserShow;
             } else {
-                $profile_data = $Data->profileFromTwitterUser($r_getUserShow['twitter_profile_data'], $session['account']['identifier']);
+                $profiles_data = $Data->profilesFromTwitterUsers(array($r_getUserShow['twitter_profile_data']), $session['account']);
+                $profile_data = array_pop($profiles_data);
             }
         }
 
@@ -68,9 +69,7 @@ class Route_Messages {
 
         if (empty($response)) {
             $response['success'] = true;
-            $response['message'] = "Here are your threads";
-            //$response['account_data'] = $Data->publicAccount($session['account'], $session['account']);
-            $response['profile_data'] = $profile_data;
+            $response['message'] = "Here are your messages";
             $response['messages_data'] = $messages_data;
         }
 

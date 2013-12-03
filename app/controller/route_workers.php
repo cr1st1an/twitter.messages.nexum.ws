@@ -32,9 +32,11 @@ class Route_Workers {
                 if ($r_apiGet_DM['success']) {
                     $twitter_ddmm_in_data = $r_apiGet_DM['api_data'];
                     foreach ($twitter_ddmm_in_data as $twitter_dm_data) {
-                        $twitter_ddmm_data[$twitter_dm_data['id']] = $twitter_dm_data;
-                        if (!isset($params['max_id']) || $params['max_id'] > $twitter_dm_data['id'])
-                            $params['max_id'] = $twitter_dm_data['id'];
+                        if (!empty($twitter_dm_data['id'])) {
+                            $twitter_ddmm_data[$twitter_dm_data['id']] = $twitter_dm_data;
+                            if (!isset($params['max_id']) || $params['max_id'] > $twitter_dm_data['id'])
+                                $params['max_id'] = $twitter_dm_data['id'];
+                        }
                     }
                 }
             } while (APP_PAGE_ITEMS <= count($twitter_ddmm_in_data));
@@ -47,9 +49,11 @@ class Route_Workers {
                 if ($r_apiGet_DMS['success']) {
                     $twitter_ddmm_out_data = $r_apiGet_DMS['api_data'];
                     foreach ($twitter_ddmm_out_data as $twitter_dm_data) {
-                        $twitter_ddmm_data[$twitter_dm_data['id']] = $twitter_dm_data;
-                        if (!isset($params['max_id']) || $params['max_id'] > $twitter_dm_data['id'])
-                            $params['max_id'] = $twitter_dm_data['id'];
+                        if (!empty($twitter_dm_data['id'])) {
+                            $twitter_ddmm_data[$twitter_dm_data['id']] = $twitter_dm_data;
+                            if (!isset($params['max_id']) || $params['max_id'] > $twitter_dm_data['id'])
+                                $params['max_id'] = $twitter_dm_data['id'];
+                        }
                     }
                 }
             } while (APP_PAGE_ITEMS <= count($twitter_ddmm_out_data));
@@ -80,9 +84,9 @@ class Route_Workers {
                     $MC_Messages->insert($message_data);
                 }
             }
-            
-            file_get_contents('http://dev.streaming.messages.nexum.ws/load.php?i='.$session['account']['id_account']);
-            
+
+            file_get_contents('http://dev.streaming.messages.nexum.ws/load.php?i=' . $session['account']['id_account']);
+
             $response['success'] = true;
             $response['message'] = "The messages have been synced";
         }

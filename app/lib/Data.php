@@ -109,21 +109,62 @@ class Data {
         return $account_data;
     }
 
-    public function profileFromTwitterUser($TWITTER_USER_OBJECT, $ACCOUNT_IDENTIFIER = NULL, $FOLLOWERS_IDS = array(), $FRIENDS_IDS = array()) {
-        $profile_data = array();
+    public function profilesFromTwitterUsers($TWITTER_USER_OBJECTS, $ACCOUNT = array()) {
+        include_once Epi::getPath('data') . 'mc_accounts.php';
+        include_once Epi::getPath('data') . 'mc_lib_twitter.php';
+        
+        $MC_Accounts = new MC_Accounts();
+        $MC_Lib_Twitter = new MC_Lib_Twitter();
 
+        $profiles_data = array();
+
+        $followers_ids = array();
+        $friends_ids = array();
+        $featured_ids = array();
+
+        if (!empty($ACCOUNT['credentials'])) {
+            $r_getFollowersIds = $MC_Lib_Twitter->getFollowersIds($ACCOUNT['identifier'], $ACCOUNT['credentials']);
+            if ($r_getFollowersIds['success']) {
+                $followers_ids = $r_getFollowersIds['followers_ids'];
+            }
+
+            $r_getFriendsIds = $MC_Lib_Twitter->getFriendsIds($ACCOUNT['identifier'], $ACCOUNT['credentials']);
+            if ($r_getFriendsIds['success']) {
+                $friends_ids = $r_getFriendsIds['friends_ids'];
+            }
+        }
+        
+        $r_selectFeaturedIds = $MC_Accounts->selectFeaturedIds();
+        if($r_selectFeaturedIds['success']){
+            $featured_ids = $r_selectFeaturedIds['featured_ids'];
+        }
+        
+        foreach ($TWITTER_USER_OBJECTS as $twitter_user_object) {
+            $profiles_data[] = $this->profileFromTwitterUser($twitter_user_object, $ACCOUNT['identifier'], $followers_ids, $friends_ids, $featured_ids);
+        }
+
+        return $profiles_data;
+    }
+
+    public function profileFromTwitterUser($TWITTER_USER_OBJECT, $ACCOUNT_IDENTIFIER, $FOLLOWERS_IDS = array(), $FRIENDS_IDS = array(), $FEATURED_IDS = array()) {
+        $staff_ids = array('18040417', '6998852', '2148355670');
+        
+        $profile_data = array();
+        
         $profile_data['identifier'] = $TWITTER_USER_OBJECT['id_str'];
         $profile_data['fullname'] = isset($TWITTER_USER_OBJECT['name']) ? $TWITTER_USER_OBJECT['name'] : '';
         $profile_data['username'] = $TWITTER_USER_OBJECT['screen_name'];
         $profile_data['picture'] = str_ireplace('_normal', '_bigger', $TWITTER_USER_OBJECT['profile_image_url_https']);
         $profile_data['description'] = isset($TWITTER_USER_OBJECT['description']) ? $TWITTER_USER_OBJECT['description'] : '';
         $profile_data['back'] = isset($TWITTER_USER_OBJECT['profile_banner_url']) ? $TWITTER_USER_OBJECT['profile_banner_url'] . '/mobile_retina' : '';
-        $profile_data['count_following'] = $TWITTER_USER_OBJECT['friends_count'];
-        $profile_data['count_followers'] = $TWITTER_USER_OBJECT['followers_count'];
+        $profile_data['protected'] = $TWITTER_USER_OBJECT['protected'];
+        $profile_data['verified'] = $TWITTER_USER_OBJECT['verified'];
+        $profile_data['staff'] = (in_array($profile_data['identifier'], $staff_ids) ? true : false);
+        $profile_data['featured'] = (in_array($profile_data['identifier'], $FEATURED_IDS) ? true : false);
         $profile_data['follower'] = (in_array($profile_data['identifier'], $FOLLOWERS_IDS) ? true : false);
         $profile_data['following'] = (in_array($profile_data['identifier'], $FRIENDS_IDS) ? true : false);
         $profile_data['own'] = ($profile_data['identifier'] == $ACCOUNT_IDENTIFIER ? true : false);
-        
+
         return $profile_data;
     }
 
@@ -164,7 +205,7 @@ class Data {
                 $message_thread_data['timeago'] = $this->getTimeAgo(strtotime($message_data['created']));
                 $message_thread_data['identifier'] = $identifier;
                 $message_thread_data['preview'] = $message_data['text'];
-                $message_thread_data['opened'] = false;
+                $message_thread_data['opened'] = true;
                 $message_thread_data['folder'] = 0;
 
                 $messages_threads_data[] = $message_thread_data;
@@ -177,7 +218,7 @@ class Data {
     public function threadsMerge($MESSAGES_THREADS_DATA, $THREADS_DATA) {
         $threads_data = array();
         $match_keys = array();
-        
+
         foreach ($THREADS_DATA as $id => $thread_data) {
             $match_keys[$thread_data['identifier']] = $id;
         }
@@ -197,7 +238,7 @@ class Data {
         usort($threads_data, 'Data::sortThreads');
         return $threads_data;
     }
-    
+
     public function getTimeAgo($TIME) {
         $periods = array("second", "minute", "hour", "day", "week", "month", "year", "decade");
         $lengths = array("60", "60", "24", "7", "4.35", "12", "10");
@@ -221,14 +262,14 @@ class Data {
 
         return "$difference $periods[$j]";
     }
-    
+
     private function sortMessages($thread_a, $thread_b) {
         if ($thread_a['created'] == $thread_b['created']) {
             return 0;
         }
         return ($thread_a['created'] < $thread_b['created']) ? -1 : 1;
     }
-    
+
     private function sortMessagesReverse($thread_a, $thread_b) {
         if ($thread_a['created'] == $thread_b['created']) {
             return 0;
